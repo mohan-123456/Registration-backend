@@ -18,13 +18,16 @@ public class UserService {
 	    @Autowired
 	    private PasswordEncoder passwordEncoder;
 
+	    private static final Logger logger = LogManager.getLogger(UserService.class);
+
 	    public User registerUser(User user) {
-	        user.setPassword(passwordEncoder.encode(user.getPassword()));
+	        logger.debug("Saving user to the database: {}", user.getEmail());
 	        return userRepository.save(user);
 	    }
 
-	    public Optional<User> findByUsername(String username) {
-	        return userRepository.findByUsername(username);
+	    public Optional<User> findByEmail(String email) {
+	        logger.debug("Checking if email exists: {}", email);
+	        return userRepository.findByEmail(email);
 	    }
 
 		public boolean existsByUsername(String username) {
@@ -36,6 +39,7 @@ public class UserService {
 			// TODO Auto-generated method stub
 			return false;
 		}
+
 
 		
 }
