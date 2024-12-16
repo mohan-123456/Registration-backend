@@ -16,24 +16,21 @@ import com.telusko.regapp.service.UserService;
 @RestController
 @RequestMapping("/")
 public class UserController {
-	@Autowired
+@Autowired
     private UserService userService;
+    private static final Logger logger = LogManager.getLogger(UserController.class);
+
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        if (userService.existsByUsername(user.getUsername()) || userService.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Username or Email already exists");
+    public ResponseEntity<String> registerUser(@RequestBody User user) {
+        logger.info("Received registration request for email: {}", user.getEmail());
+        Optional<User> existingUser = userService.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            logger.warn("Attempt to register with an already registered email: {}", user.getEmail());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is already registered!");
         }
         userService.registerUser(user);
-        return ResponseEntity.ok("User registered successfully");
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        Optional<User> existingUser = userService.findByUsername(user.getUsername());
-        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
-            return ResponseEntity.ok("Login successful");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        logger.info("User registered successfully: {}", user.getEmail());
+        return ResponseEntity.ok("User registered successfully!");
     }
 }
